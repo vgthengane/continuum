@@ -25,12 +25,14 @@ class _BaseScenario(abc.ABC):
             self,
             cl_dataset: _ContinuumDataset,
             nb_tasks: int,
-            transformations: Union[List[Callable], List[List[Callable]]] = None
+            transformations: Union[List[Callable], List[List[Callable]]] = None,
+            clip_transformations: Union[List[Callable], List[List[Callable]]] = None
     ) -> None:
 
         self.cl_dataset = cl_dataset
         self._nb_tasks = nb_tasks
         self.transformations = transformations
+        self.clip_transformations = clip_transformations
         self._counter = 0
 
         if transformations is None:
@@ -51,6 +53,8 @@ class _BaseScenario(abc.ABC):
             self.trsf = [composer(trsf) for trsf in self.transformations]
         else:
             self.trsf = composer(self.transformations)
+        
+        self.clip_trsf = clip_transformations
 
     @abc.abstractmethod
     def _setup(self, nb_tasks: int) -> int:
@@ -123,6 +127,7 @@ class _BaseScenario(abc.ABC):
         return TaskSet(
             x, y, t,
             trsf=self.trsf[task_index] if isinstance(self.trsf, list) else self.trsf,
+            clip_trsf=self.clip_trsf,
             data_type=self.cl_dataset.data_type,
             bounding_boxes=self.cl_dataset.bounding_boxes,
             data_indexes=data_indexes

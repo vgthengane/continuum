@@ -43,6 +43,7 @@ class BaseTaskSet(TorchDataset):
             y: np.ndarray,
             t: np.ndarray,
             trsf: Union[transforms.Compose, List[transforms.Compose]],
+            clip_trsf: Union[transforms.Compose, List[transforms.Compose]],
             target_trsf: Optional[Union[transforms.Compose, List[transforms.Compose]]] = None,
             bounding_boxes: Optional[np.ndarray] = None
     ):
@@ -53,6 +54,7 @@ class BaseTaskSet(TorchDataset):
             self._t = -1 * np.ones_like(y, dtype=np.int64)
 
         self.trsf = trsf
+        self.clip_trsf = clip_trsf
         self.data_type = TaskType.TENSOR
         self.target_trsf = target_trsf
         self.data_type = TaskType.TENSOR
@@ -166,12 +168,16 @@ class BaseTaskSet(TorchDataset):
     def __getitem__(self, index: int) -> Tuple[np.ndarray, int, int]:
         """Method used by PyTorch's DataLoaders to query a sample and its target."""
         x = self.get_sample(index)
+        if self.clip_trsf is not None:
+            x_clip = self.clip_trsf(x)
         y = self._y[index]
         t = self._t[index]
 
         if self.target_trsf is not None:
             y = self.get_task_target_trsf(t)(y)
 
+        if self.clip_trsf is not None:
+            return x, x_clip, y, t
         return x, y, t
 
     def get_task_trsf(self, t: int):

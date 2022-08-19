@@ -16,6 +16,7 @@ def TaskSet(x: np.ndarray,
             y: np.ndarray,
             t: np.ndarray,
             trsf: Union[transforms.Compose, List[transforms.Compose]] = None,
+            clip_trsf: Union[transforms.Compose, List[transforms.Compose]] = None,
             target_trsf: Optional[Union[transforms.Compose, List[transforms.Compose]]] = None,
             data_type: TaskType = TaskType.IMAGE_ARRAY,
             bounding_boxes: Optional[np.ndarray] = None,
@@ -24,7 +25,7 @@ def TaskSet(x: np.ndarray,
         assert bounding_boxes is None, print("bounding_boxes are not compatible with TaskType.TEXT")
         task_set = TextTaskSet(x=x, y=y, t=t, trsf=trsf, target_trsf=target_trsf)
     elif data_type == TaskType.IMAGE_ARRAY:
-        task_set = ArrayTaskSet(x=x, y=y, t=t, trsf=trsf, target_trsf=target_trsf, bounding_boxes=bounding_boxes)
+        task_set = ArrayTaskSet(x=x, y=y, t=t, trsf=trsf, clip_trsf=clip_trsf, target_trsf=target_trsf, bounding_boxes=bounding_boxes)
     elif data_type == TaskType.IMAGE_PATH:
         task_set = PathTaskSet(x=x, y=y, t=t, trsf=trsf, target_trsf=target_trsf, bounding_boxes=bounding_boxes)
     elif data_type == TaskType.SEGMENTATION:

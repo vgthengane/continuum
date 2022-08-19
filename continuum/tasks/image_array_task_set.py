@@ -26,10 +26,11 @@ class ArrayTaskSet(BaseTaskSet):
             y: np.ndarray,
             t: np.ndarray,
             trsf: Union[transforms.Compose, List[transforms.Compose]],
+            clip_trsf: Union[transforms.Compose, List[transforms.Compose]],
             target_trsf: Optional[Union[transforms.Compose, List[transforms.Compose]]],
             bounding_boxes: Optional[np.ndarray] = None
     ):
-        super().__init__(x, y, t, trsf, target_trsf, bounding_boxes=bounding_boxes)
+        super().__init__(x, y, t, trsf, clip_trsf, target_trsf, bounding_boxes=bounding_boxes)
         self.data_type = TaskType.IMAGE_ARRAY
 
     def plot(
@@ -87,6 +88,8 @@ class ArrayTaskSet(BaseTaskSet):
     def __getitem__(self, index: int) -> Tuple[np.ndarray, int, int]:
         """Method used by PyTorch's DataLoaders to query a sample and its target."""
         x = self.get_sample(index)
+        if self.clip_trsf is not None:
+            x_clip = self.clip_trsf(x)
         y = self._y[index]
         t = self._t[index]
 
@@ -104,6 +107,8 @@ class ArrayTaskSet(BaseTaskSet):
         if self.target_trsf is not None:
             y = self.get_task_target_trsf(t)(y)
 
+        if self.clip_trsf is not None:
+            return x, x_clip, y, t
         return x, y, t
 
     def _prepare_data(self, x, y, t):
