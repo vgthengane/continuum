@@ -90,8 +90,6 @@ class ArrayTaskSet(BaseTaskSet):
         x = self.get_sample(index)
         if self.clip_trsf is not None:
             x_clip = self.clip_trsf(x)
-        else:
-            x_clip = torch.zeros(1,)
         y = self._y[index]
         t = self._t[index]
 
@@ -108,9 +106,10 @@ class ArrayTaskSet(BaseTaskSet):
 
         if self.target_trsf is not None:
             y = self.get_task_target_trsf(t)(y)
-
-
-        return x, x_clip, y, t
+        
+        if self.clip_trsf is not None:
+            return x, x_clip, y, t
+        return x, y, t
 
     def _prepare_data(self, x, y, t):
         if self.trsf is not None:
